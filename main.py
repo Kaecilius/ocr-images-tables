@@ -1,33 +1,27 @@
 import cv2
 import pytesseract
-from pytesseract import Output
 
 pytesseract.pytesseract.tesseract_cmd = "C:/Program Files/Tesseract-OCR/tesseract.exe"
 
-def get_grayscale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def thresholding(image):
+    return cv2.threshold(image, 100, 255, cv2.THRESH_BINARY_INV)[1]
+
+def get_text_from_image(image, config):
+    # process image
+    img = thresholding(image)
+    text = pytesseract.image_to_string(img, lang="spa", config=config)
+    words = str(text).split("\n")
+    list_words = [word for word in words if len(word) > 1]
+    
+    return list_words
+
 
 def main():
     img = cv2.imread("images/test2.jpg")
-    gray = get_grayscale(img)
+    config = r"--oem 3 --psm 6"
 
-    # thresh = thresholding(gray)
-    custom_config = r"--oem 3"
-    text = pytesseract.image_to_string(gray, lang = "spa", config=custom_config)
-    print( text )
-
-    d = pytesseract.image_to_data(img, output_type=Output.DICT)
-    print(d.keys())
-
+    print( get_text_from_image(img, config) )
+   
 if __name__ == "__main__":
+    
     main()
-    # img = cv2.imread("images/test2.jpg")
-
-    # h, w, c = img.shape
-    # boxes = pytesseract.image_to_boxes(img) 
-    # for b in boxes.splitlines():
-    #     b = b.split(' ')
-    #     img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
-
-    # cv2.imshow('img', img)
-    # cv2.waitKey(0)
